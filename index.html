@@ -38,34 +38,80 @@
     {
         this.load.image('background', 'assets/background.png');
         this.load.image('paddle', 'assets/paddle.png');
+        this.load.image('ball', 'assets/ball.png');
         this.load.image('point', 'assets/point.png');
+        this.load.image('wallX', 'assets/wallX1.png');
+        this.load.image('wallY', 'assets/wallY1.png');
         this.load.spritesheet('explosion', 'assets/explosion.png', { frameWidth: 34, frameHeight: 30 });
     }
 
     function create ()
     {
-        this.add.image(400, 300, 'background');;
+        //bg
+        this.add.image(400, 300, 'background');
+
+        //walls
+        walls = this.physics.add.staticGroup();
+        walls.create(400, 0, 'wallX');
+        walls.create(0, 300, 'wallY');
+        walls.create(799, 300, 'wallY');
+
+
+        //paddle
         paddle = this.physics.add.image(400,580,'paddle');
-        explosion = this.add.sprite(100, 450, 'explosion');
         paddle.setCollideWorldBounds(true);
+
+        //balls
+        balls = this.physics.add.group({
+            key: 'ball'
+        });
+        balls.create(400,400,'ball');
+        balls.children.iterate(function (child) {
+            child.setBounce(1.0);
+            // child.setVelocityX(Phaser.Math.FloatBetween(-1,1) * 100);
+        });
+        // balls.setCollideWorldBounds(true);
+
+        //points
+        points = this.physics.add.staticGroup({
+            key: 'point'
+        });
+        points.create(400, 500, 'point');
+
+        //collision
+        this.physics.add.collider(paddle, balls);
+        this.physics.add.collider(balls,walls);
+        this.physics.add.collider(points, balls, collectPoint);
+
+        explosion = this.add.sprite(100, 450, 'explosion');
+
         cursors = this.input.keyboard.createCursorKeys();
+
+        function collectPoint(point, ball) {
+            point.disableBody(true, true);
+        }
     }
 
     function update ()
     {
         if (cursors.left.isDown)
         {
-            paddle.setVelocityX(-160);
+            paddle.setVelocityX(-300);
         }
         else if (cursors.right.isDown)
         {
-            paddle.setVelocityX(160);
+            paddle.setVelocityX(300);
         }
         else
         {
             paddle.setVelocityX(0);
-        }
+            }
     }
+
+    /*
+    balls worldbounds breaks ball/paddle collision, key: ball spawns ball in top left corner
+     */
+
 
 </script>
 
